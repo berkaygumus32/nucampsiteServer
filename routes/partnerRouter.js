@@ -1,5 +1,6 @@
 const express = require('express');
 const Partner = require('../models/partner');
+const authenticate = require('../authenticate');
 
 const partnerRouter = express.Router();
 
@@ -14,7 +15,7 @@ partnerRouter.route('/')
     .catch(err => next(err));
 })
 
-.post((req, res) => {
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
     Partner.create(req.body)
     .then(partner => {
         console.log('Partner Created', partner);
@@ -25,13 +26,13 @@ partnerRouter.route('/')
     .catch(err => next(err));
 })
 
-.put((req, res) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
     res.write(`Updating the partners: ${req.params.partnerId}\n`);
     res.end(`Will update the partners: ${req.body.name}
     with description: ${req.body.description}`);
 })
 
-.delete((req, res) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
     Partner.deleteMany()
     .then(response => {
         res.statusCode = 200;
@@ -52,12 +53,12 @@ partnerRouter.route('/:partnerId')
         .catch(err => next(err));
 })
 
-.post((req, res) => {
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
     res.statusCode = 403;
     res.end(`Post operation not supported on /partners/${req.params.partnerId}`);
 })
 
-.put((req, res) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
     Partner.findByIdAndUpdate(req.params.partnerId, {
         $set: req.body
     }, { new: true })
@@ -69,7 +70,7 @@ partnerRouter.route('/:partnerId')
     .catch(err => next(err));
 })
 
-.delete((req, res) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
     Partner.findByIdAndDelete(req.params.partnerId)
     .then(response => {
         res.statusCode = 200;
